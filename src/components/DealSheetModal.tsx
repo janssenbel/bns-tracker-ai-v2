@@ -101,28 +101,28 @@ export const DealSheetModal: React.FC<DealSheetModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/80 backdrop-blur-sm overflow-y-auto animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-6 bg-slate-950/80 backdrop-blur-sm overflow-y-auto animate-in fade-in duration-200">
       {/* Background click */}
       <div className="fixed inset-0" onClick={onClose} />
 
-      <div className="relative w-full max-w-4xl bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col max-h-[92vh] overflow-hidden z-10">
+      <div className="relative w-full max-w-4xl bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col max-h-[94vh] overflow-hidden z-10">
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60">
-          <div>
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60">
+          <div className="min-w-0 pr-2">
             <div className="flex items-center gap-2">
-              <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-              <h3 className="text-lg font-black text-slate-900 dark:text-white">
+              <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-400 shrink-0" />
+              <h3 className="text-sm sm:text-lg font-black text-slate-900 dark:text-white truncate">
                 Deal Settlement Statement
               </h3>
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">
               {record.title} <span className="font-mono font-bold text-amber-600 dark:text-amber-400">({record.plate})</span>
             </p>
           </div>
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors shrink-0"
             title="Close Modal"
           >
             <X className="w-5 h-5" />
@@ -130,50 +130,50 @@ export const DealSheetModal: React.FC<DealSheetModalProps> = ({
         </div>
 
         {/* Modal Actions Bar */}
-        <div className="p-4 sm:p-5 border-b border-slate-200 dark:border-slate-800 bg-slate-100/70 dark:bg-slate-800/40">
+        <div className="p-3 sm:p-5 border-b border-slate-200 dark:border-slate-800 bg-slate-100/70 dark:bg-slate-800/40">
           {/* iOS / Mobile Tip */}
-          <div className="flex items-start gap-2.5 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 p-3 rounded-xl text-xs text-blue-900 dark:text-blue-300 mb-3">
+          <div className="flex items-start gap-2 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 p-2.5 sm:p-3 rounded-xl text-[11px] sm:text-xs text-blue-900 dark:text-blue-300 mb-2.5 sm:mb-3">
             <Smartphone className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
             <div>
-              <strong className="font-bold">iPhone & Mobile Note:</strong> Tap <strong>&quot;Save to Files / Share&quot;</strong> to export to the iOS Files App, WhatsApp, AirDrop, or Messenger. Or tap <strong>&quot;Print&quot;</strong> to send to an AirPrint/connected printer.
+              <strong className="font-bold">iPhone & Mobile Note:</strong> Tap <strong>&quot;Save to Files / Share&quot;</strong> to export to iOS Files, WhatsApp, or AirDrop, or tap <strong>&quot;Print&quot;</strong> for AirPrint / PDF.
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             <button
               type="button"
               onClick={handleShareDirect}
-              className="flex items-center justify-center gap-2 py-2.5 px-4 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md shadow-blue-600/20 transition-all cursor-pointer"
+              className="col-span-2 sm:col-span-1 flex items-center justify-center gap-2 py-2.5 px-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md shadow-blue-600/20 transition-all cursor-pointer whitespace-nowrap"
             >
-              <Share2 className="w-4 h-4" />
+              <Share2 className="w-4 h-4 shrink-0" />
               Save to Files / Share
             </button>
 
             <button
               type="button"
               onClick={handlePrint}
-              className="flex items-center justify-center gap-2 py-2.5 px-4 bg-slate-800 hover:bg-slate-900 active:bg-slate-950 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md transition-all cursor-pointer dark:bg-slate-700 dark:hover:bg-slate-600"
+              className="flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 px-3 bg-slate-800 hover:bg-slate-900 active:bg-slate-950 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md transition-all cursor-pointer dark:bg-slate-700 dark:hover:bg-slate-600 whitespace-nowrap"
             >
-              <Printer className="w-4 h-4 text-amber-400" />
-              Print (AirPrint / PDF)
+              <Printer className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 shrink-0" />
+              Print / PDF
             </button>
 
             <button
               type="button"
               onClick={handleDownloadHtml}
-              className="flex items-center justify-center gap-2 py-2.5 px-4 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 font-bold text-xs sm:text-sm rounded-xl transition-all cursor-pointer shadow-sm"
+              className="flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 px-3 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 font-bold text-xs sm:text-sm rounded-xl transition-all cursor-pointer shadow-sm whitespace-nowrap"
             >
-              <Download className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+              <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-500 dark:text-slate-400 shrink-0" />
               Download HTML
             </button>
           </div>
         </div>
 
         {/* Modal Printable Document Body */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-100 dark:bg-slate-950/70">
+        <div className="flex-1 overflow-y-auto p-2.5 sm:p-6 bg-slate-100 dark:bg-slate-950/70">
           <div
             ref={previewRef}
-            className="bg-white text-slate-900 rounded-xl p-5 sm:p-8 shadow-md border border-slate-200"
+            className="bg-white text-slate-900 rounded-xl p-3.5 sm:p-8 shadow-md border border-slate-200 overflow-x-auto"
             dangerouslySetInnerHTML={{ __html: docHtml }}
           />
         </div>

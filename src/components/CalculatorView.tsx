@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   CurrencySymbol,
   PartnerWorkingState,
@@ -12,10 +12,6 @@ import {
   Trash2,
   Save,
   RotateCcw,
-  Sparkles,
-  Layers,
-  Calendar,
-  DollarSign,
   AlertCircle,
   CheckCircle2,
 } from 'lucide-react';
@@ -32,13 +28,36 @@ interface CalculatorViewProps {
 
 const COMMON_EXPENSE_TEMPLATES = [
   'Vehicle Acquisition / Buy Share',
-  'Detailing / 3-Stage Buffing & Interior',
-  'Mechanical PMS / Engine Oil & Filters',
+  'Detailing / Cleaning / Buffing',
+  'Mechanical PMS / Oil & Filters',
   'LTO Transfer / Notary / Doc Stamps',
   'Body Repair & Paint Touch-up',
   'Tires / Mags / Battery',
   'Agent / Finder Commission',
   'Gasoline & RFID Tolls',
+];
+
+const createDefaultPartners = (): PartnerWorkingState[] => [
+  {
+    id: 'p1',
+    name: 'Janssen',
+    share: 50,
+    expenses: [
+      { id: 'e1', name: 'Vehicle Acquisition / Buy Share', value: '' },
+      { id: 'e2', name: 'Detailing / Cleaning / Buffing', value: '' },
+      { id: 'e3', name: 'Mechanical PMS / Engine Oil / Parts', value: '' },
+    ],
+  },
+  {
+    id: 'p2',
+    name: 'Ralph',
+    share: 50,
+    expenses: [
+      { id: 'e4', name: 'Vehicle Acquisition / Buy Share', value: '' },
+      { id: 'e5', name: 'LTO Transfer / Notary / Doc Stamps', value: '' },
+      { id: 'e6', name: 'Body Repair & Paint Touch-up', value: '' },
+    ],
+  },
 ];
 
 export const CalculatorView: React.FC<CalculatorViewProps> = ({
@@ -50,57 +69,31 @@ export const CalculatorView: React.FC<CalculatorViewProps> = ({
   autoBackupEnabled,
   onToggleAutoBackup,
 }) => {
-  // Vehicle Metadata
-  const [year, setYear] = useState<string>('2021');
-  const [make, setMake] = useState<string>('Toyota');
-  const [model, setModel] = useState<string>('Fortuner 2.8 V 4x2 AT');
-  const [plate, setPlate] = useState<string>('ABC 1234');
-  const [dateBought, setDateBought] = useState<string>('2024-03-01');
+  // Vehicle Metadata (Starts completely blank with no preloaded values)
+  const [year, setYear] = useState<string>('');
+  const [make, setMake] = useState<string>('');
+  const [model, setModel] = useState<string>('');
+  const [plate, setPlate] = useState<string>('');
+  const [dateBought, setDateBought] = useState<string>('');
   const [dateSold, setDateSold] = useState<string>('');
   const [currency, setCurrency] = useState<CurrencySymbol>('₱');
-  const [sellPrice, setSellPrice] = useState<string>('1650000');
+  const [sellPrice, setSellPrice] = useState<string>('');
 
   // Partners State
-  const [partners, setPartners] = useState<PartnerWorkingState[]>([
-    {
-      id: 'p1',
-      name: 'Janssen',
-      share: 50,
-      expenses: [
-        { id: 'e1', name: 'Vehicle Acquisition / Buy Share', value: '750000' },
-        { id: 'e2', name: 'Detailing / 3-Stage Buffing & Interior', value: '14000' },
-        { id: 'e3', name: 'Mechanical PMS / Engine Oil & Filters', value: '10000' },
-      ],
-    },
-    {
-      id: 'p2',
-      name: 'Ralph',
-      share: 50,
-      expenses: [
-        { id: 'e4', name: 'Vehicle Acquisition / Buy Share', value: '650000' },
-        { id: 'e5', name: 'LTO Transfer / Notary / Doc Stamps', value: '16000' },
-        { id: 'e6', name: 'Body Repair & Paint Touch-up', value: '12000' },
-      ],
-    },
-  ]);
+  const [partners, setPartners] = useState<PartnerWorkingState[]>(createDefaultPartners);
   const [activePartnerId, setActivePartnerId] = useState<string>('p1');
 
-  // When user selects a vehicle from dropdown
-  const handleDropdownSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const val = e.target.value;
-    if (val === 'new') {
-      handleResetForm();
-    } else {
-      const idNum = parseInt(val, 10);
-      const found = records.find((r) => r.id === idNum);
+  // Sync form when activeUnitId changes externally (e.g. clicking Edit from Inventory tab)
+  useEffect(() => {
+    if (activeUnitId !== null) {
+      const found = records.find((r) => r.id === activeUnitId);
       if (found) {
-        loadRecord(found);
+        populateRecordFields(found);
       }
     }
-  };
+  }, [activeUnitId]);
 
-  const loadRecord = (record: VehicleRecord) => {
-    onSelectUnit(record.id);
+  const populateRecordFields = (record: VehicleRecord) => {
     setYear(record.year?.toString() || '');
     setMake(record.make || '');
     setModel(record.model || '');
@@ -129,6 +122,21 @@ export const CalculatorView: React.FC<CalculatorViewProps> = ({
     }
   };
 
+  // When user selects a vehicle from dropdown
+  const handleDropdownSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const val = e.target.value;
+    if (val === 'new') {
+      handleResetForm();
+    } else {
+      const idNum = parseInt(val, 10);
+      const found = records.find((r) => r.id === idNum);
+      if (found) {
+        onSelectUnit(found.id);
+        populateRecordFields(found);
+      }
+    }
+  };
+
   const handleResetForm = () => {
     onSelectUnit(null);
     setYear('');
@@ -138,34 +146,19 @@ export const CalculatorView: React.FC<CalculatorViewProps> = ({
     setDateBought('');
     setDateSold('');
     setSellPrice('');
-    setPartners([
-      {
-        id: 'p1',
-        name: 'Janssen',
-        share: 50,
-        expenses: [
-          { id: 'e1', name: 'Vehicle Acquisition / Buy Share', value: '' },
-          { id: 'e2', name: 'Detailing / Cleaning / Buffing', value: '' },
-          { id: 'e3', name: 'Mechanical PMS / Engine Oil / Parts', value: '' },
-        ],
-      },
-      {
-        id: 'p2',
-        name: 'Ralph',
-        share: 50,
-        expenses: [
-          { id: 'e4', name: 'Vehicle Acquisition / Buy Share', value: '' },
-          { id: 'e5', name: 'LTO Transfer / Notary / Doc Stamps', value: '' },
-          { id: 'e6', name: 'Body Repair & Paint Touch-up', value: '' },
-        ],
-      },
-    ]);
+    setPartners(createDefaultPartners());
     setActivePartnerId('p1');
   };
 
   // Calculations
-  const fullTitle = [year, make, model].filter(Boolean).join(' ') || (activeUnitId ? 'Unnamed Vehicle' : '- - - - -');
-  const displayPlate = plate.trim() ? plate.toUpperCase() : (activeUnitId ? 'NO PLATE' : 'NEW UNIT');
+  const fullTitle =
+    [year, make, model].filter(Boolean).join(' ') ||
+    (activeUnitId ? 'Unnamed Vehicle' : '- - - - -');
+  const displayPlate = plate.trim()
+    ? plate.toUpperCase()
+    : activeUnitId
+    ? 'NO PLATE'
+    : 'NEW UNIT';
   const numericSell = parseFloat(sellPrice) || 0;
 
   // Compute Days
@@ -196,7 +189,7 @@ export const CalculatorView: React.FC<CalculatorViewProps> = ({
       name: partner.name,
       share: partner.share,
       spent: partnerSpent,
-      profitPortion: 0, // calculated below once netProfit is known
+      profitPortion: 0,
       payout: 0,
       expenses: nonZeroExpenses,
     });
@@ -382,50 +375,51 @@ export const CalculatorView: React.FC<CalculatorViewProps> = ({
   const isSplitBalanced = Math.abs(totalSharesPct - 100) < 0.05;
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-4">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+    <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 py-3 sm:py-4">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-start">
         {/* LEFT COLUMN: Input Form & Dynamic Partner Expenses (7 cols) */}
-        <div className="lg:col-span-7 space-y-5 bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-7 shadow-xl border border-slate-200/80 dark:border-slate-800">
-          {/* Unit Selector Bar */}
-          <div className="bg-slate-50 dark:bg-slate-800/60 p-3 sm:p-4 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-            <div className="flex-1">
-              <div className="flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">
-                <span>Select Vehicle Unit</span>
-                <span className="font-mono text-blue-600 dark:text-blue-400">
-                  {records.length} Saved {records.length === 1 ? 'Vehicle' : 'Vehicles'}
-                </span>
-              </div>
+        <div className="lg:col-span-7 space-y-4 sm:space-y-5 bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl p-4 sm:p-7 shadow-xl border border-slate-200/80 dark:border-slate-800">
+          {/* Unit Selector Bar (Optimized for Portrait Mode) */}
+          <div className="bg-slate-50 dark:bg-slate-800/60 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-700/80 space-y-1.5">
+            <div className="flex items-center justify-between text-[11px] sm:text-xs font-extrabold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              <span>Select Vehicle Unit</span>
+              <span className="font-mono text-blue-600 dark:text-blue-400 normal-case">
+                {records.length} {records.length === 1 ? 'Vehicle' : 'Vehicles'} Saved
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
               <select
                 value={activeUnitId ?? 'new'}
                 onChange={handleDropdownSelect}
-                className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-sm font-semibold text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer"
+                className="flex-1 min-w-0 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2.5 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer truncate"
               >
-                <option value="new">- - - - - (Start New Vehicle Deal)</option>
+                <option value="new">- - - - - (New Vehicle Deal)</option>
                 {records.map((r) => (
                   <option key={r.id} value={r.id}>
                     🚗 [{r.plate || 'NO PLATE'}] {r.title}
                   </option>
                 ))}
               </select>
-            </div>
 
-            <button
-              type="button"
-              onClick={handleResetForm}
-              className="sm:self-end flex items-center justify-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm rounded-xl transition-all cursor-pointer shadow-sm active:scale-95"
-            >
-              <Plus className="w-4 h-4" />
-              <span>New Unit</span>
-            </button>
+              <button
+                type="button"
+                onClick={handleResetForm}
+                className="shrink-0 flex items-center justify-center gap-1 px-3.5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs sm:text-sm rounded-xl transition-all cursor-pointer shadow-sm active:scale-95"
+                title="Start a fresh car deal"
+              >
+                <Plus className="w-4 h-4 stroke-[2.5]" />
+                <span>New</span>
+              </button>
+            </div>
           </div>
 
           {/* Active Unit Header Banner */}
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-            <div className="flex items-center gap-2.5 overflow-hidden">
-              <span className="plate-badge px-2.5 py-1 rounded-md text-xs sm:text-sm shrink-0">
+          <div className="flex items-center justify-between gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="plate-badge px-2.5 py-1 rounded-md text-xs shrink-0">
                 {displayPlate}
               </span>
-              <span className="text-base sm:text-lg font-black text-slate-900 dark:text-white truncate">
+              <span className="text-sm sm:text-lg font-black text-slate-900 dark:text-white truncate">
                 {activeUnitId ? `Editing: ${fullTitle}` : fullTitle}
               </span>
             </div>
@@ -438,7 +432,7 @@ export const CalculatorView: React.FC<CalculatorViewProps> = ({
               <select
                 value={currency}
                 onChange={(e) => setCurrency(e.target.value as CurrencySymbol)}
-                className="bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white text-xs font-bold rounded-lg px-2.5 py-1.5 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer"
+                className="bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white text-xs font-extrabold rounded-lg px-2.5 py-1.5 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer"
               >
                 <option value="₱">₱ (PHP)</option>
                 <option value="$">$ (USD)</option>
@@ -449,22 +443,23 @@ export const CalculatorView: React.FC<CalculatorViewProps> = ({
             </div>
           </div>
 
-          {/* Vehicle Metadata Fields */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div>
-              <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">
+          {/* Vehicle Metadata Fields: Year + Make side-by-side on Portrait, Model below */}
+          <div className="grid grid-cols-12 gap-2.5 sm:gap-3">
+            <div className="col-span-4 sm:col-span-3">
+              <label className="block text-[11px] sm:text-xs font-extrabold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-1">
                 Year
               </label>
               <input
-                type="text"
+                type="number"
+                inputMode="numeric"
                 value={year}
                 onChange={(e) => setYear(e.target.value)}
                 placeholder="2021"
                 className="w-full font-mono bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-blue-500 outline-none font-semibold"
               />
             </div>
-            <div>
-              <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">
+            <div className="col-span-8 sm:col-span-4">
+              <label className="block text-[11px] sm:text-xs font-extrabold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-1">
                 Make
               </label>
               <input
@@ -475,8 +470,8 @@ export const CalculatorView: React.FC<CalculatorViewProps> = ({
                 className="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-blue-500 outline-none font-semibold"
               />
             </div>
-            <div>
-              <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">
+            <div className="col-span-12 sm:col-span-5">
+              <label className="block text-[11px] sm:text-xs font-extrabold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-1">
                 Model / Variant
               </label>
               <input
@@ -490,61 +485,65 @@ export const CalculatorView: React.FC<CalculatorViewProps> = ({
           </div>
 
           {/* Plate Number */}
-          <div className="bg-amber-50/60 dark:bg-amber-950/20 p-3.5 rounded-2xl border border-amber-200/80 dark:border-amber-900/50">
-            <label className="flex items-center justify-between text-xs font-extrabold text-amber-900 dark:text-amber-300 mb-1.5">
-              <span>Plate Number / Conduction Sticker <span className="text-blue-600 dark:text-blue-400">* (Key for Save/Update)</span></span>
+          <div className="bg-amber-50/60 dark:bg-amber-950/20 p-3 sm:p-3.5 rounded-2xl border border-amber-200/80 dark:border-amber-900/50">
+            <label className="flex items-center justify-between text-[11px] sm:text-xs font-extrabold text-amber-900 dark:text-amber-300 mb-1.5">
+              <span>
+                Plate Number / Conduction Sticker{' '}
+                <span className="text-blue-600 dark:text-blue-400">* (Key for Updates)</span>
+              </span>
             </label>
             <input
               type="text"
               value={plate}
               onChange={(e) => setPlate(e.target.value.toUpperCase())}
-              placeholder="ABC 1234 / CS 9281"
+              placeholder="ABC 1234"
               className="w-full font-mono font-black tracking-wider text-base sm:text-lg bg-white dark:bg-slate-900 border-2 border-amber-300 dark:border-amber-700/80 rounded-xl px-3 py-2 text-slate-900 dark:text-white uppercase focus:ring-2 focus:ring-amber-500 outline-none"
             />
           </div>
 
-          {/* Dates & Holding Turnover */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div>
-              <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">
+          {/* Dates & Holding Turnover (Compact 2-col on Portrait) */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3 bg-slate-50 dark:bg-slate-800/40 p-3 rounded-2xl border border-slate-200/80 dark:border-slate-700/80">
+            <div className="min-w-0">
+              <label className="block text-[11px] font-extrabold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-1 truncate">
                 Date Bought
               </label>
               <input
                 type="date"
                 value={dateBought}
                 onChange={(e) => setDateBought(e.target.value)}
-                className="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs sm:text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none font-mono"
+                className="w-full min-w-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-2 text-xs sm:text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none font-mono"
               />
             </div>
-            <div>
-              <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">
-                Date Sold (Blank if in stock)
+            <div className="min-w-0">
+              <label className="block text-[11px] font-extrabold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-1 truncate">
+                Date Sold <span className="font-normal text-[10px] opacity-75">(Optional)</span>
               </label>
               <input
                 type="date"
                 value={dateSold}
                 onChange={(e) => setDateSold(e.target.value)}
-                className="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs sm:text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none font-mono"
+                className="w-full min-w-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-2 text-xs sm:text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none font-mono"
               />
             </div>
-            <div className="bg-slate-100 dark:bg-slate-800/60 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col justify-center items-center text-center">
-              <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
-                Turnover Duration
+            <div className="col-span-2 sm:col-span-1 bg-white dark:bg-slate-900 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 flex sm:flex-col justify-between sm:justify-center items-center text-center">
+              <span className="text-[11px] font-extrabold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                Total Days
               </span>
-              <span className="text-sm font-black font-mono text-blue-600 dark:text-blue-400 mt-0.5">
+              <span className="text-sm font-black font-mono text-blue-600 dark:text-blue-400 sm:mt-0.5">
                 {daysInfo.label}
               </span>
             </div>
           </div>
 
           {/* Selling Price Box */}
-          <div className="bg-emerald-50/70 dark:bg-emerald-950/20 p-4 rounded-2xl border border-emerald-200/80 dark:border-emerald-900/50">
-            <label className="flex items-center justify-between text-xs font-extrabold text-emerald-900 dark:text-emerald-300 mb-1.5">
-              <span>Gross Selling / Target Price *</span>
+          <div className="bg-emerald-50/70 dark:bg-emerald-950/20 p-3.5 sm:p-4 rounded-2xl border border-emerald-200/80 dark:border-emerald-900/50">
+            <label className="flex items-center justify-between text-xs font-extrabold uppercase tracking-wide text-emerald-900 dark:text-emerald-300 mb-1.5">
+              <span>Selling / Target Price *</span>
               <span className="font-mono text-xs">{currency}</span>
             </label>
             <input
               type="number"
+              inputMode="decimal"
               step="any"
               value={sellPrice}
               onChange={(e) => setSellPrice(e.target.value)}
@@ -554,59 +553,65 @@ export const CalculatorView: React.FC<CalculatorViewProps> = ({
           </div>
 
           {/* Dynamic Partner Tabs Section */}
-          <div className="space-y-3 pt-2">
+          <div className="space-y-3 pt-1">
             {/* Adjustable Split Banner */}
-            <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 flex flex-wrap items-center justify-between gap-2.5">
+            <div className="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 flex flex-wrap items-center justify-between gap-2">
               <div>
-                <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider">
-                  Partner Profit Split
+                <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider block">
+                  Adjustable Profit Split
                 </span>
                 <div className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                  Total Allocated: <span className="font-mono font-extrabold">{totalSharesPct.toFixed(1)}%</span>
+                  Total Allocated:{' '}
+                  <span className="font-mono font-extrabold">
+                    {totalSharesPct.toFixed(1)}%
+                  </span>
                 </div>
               </div>
 
-              {/* Status Badge */}
-              {isSplitBalanced ? (
-                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> Balanced (100%)
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-extrabold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
-                  <AlertCircle className="w-3.5 h-3.5" /> Adjust to 100% ({totalSharesPct > 100 ? '+' : ''}{(totalSharesPct - 100).toFixed(1)}%)
-                </span>
-              )}
+              <div className="flex items-center gap-2 flex-wrap">
+                {/* Quick Split Presets (if 2 partners) */}
+                {partners.length === 2 && (
+                  <div className="flex items-center gap-1 text-[11px] font-bold">
+                    <button
+                      type="button"
+                      onClick={() => handleApplySplitPreset([50, 50])}
+                      className="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 hover:bg-blue-600 hover:text-white transition-colors cursor-pointer"
+                    >
+                      50/50
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleApplySplitPreset([60, 40])}
+                      className="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 hover:bg-blue-600 hover:text-white transition-colors cursor-pointer"
+                    >
+                      60/40
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleApplySplitPreset([70, 30])}
+                      className="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 hover:bg-blue-600 hover:text-white transition-colors cursor-pointer"
+                    >
+                      70/30
+                    </button>
+                  </div>
+                )}
 
-              {/* Quick Split Presets (if 2 partners) */}
-              {partners.length === 2 && (
-                <div className="flex items-center gap-1 text-[11px] font-bold">
-                  <button
-                    type="button"
-                    onClick={() => handleApplySplitPreset([50, 50])}
-                    className="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 hover:bg-blue-600 hover:text-white transition-colors cursor-pointer"
-                  >
-                    50/50
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleApplySplitPreset([60, 40])}
-                    className="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 hover:bg-blue-600 hover:text-white transition-colors cursor-pointer"
-                  >
-                    60/40
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleApplySplitPreset([70, 30])}
-                    className="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 hover:bg-blue-600 hover:text-white transition-colors cursor-pointer"
-                  >
-                    70/30
-                  </button>
-                </div>
-              )}
+                {/* Status Badge */}
+                {isSplitBalanced ? (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> Balanced (100%)
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
+                    <AlertCircle className="w-3.5 h-3.5" /> Adjust ({totalSharesPct > 100 ? '+' : ''}
+                    {(totalSharesPct - 100).toFixed(1)}%)
+                  </span>
+                )}
+              </div>
             </div>
 
             {/* Partner Tabs Bar */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-1">
+            <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1">
               {partners.map((p) => {
                 const isActive = p.id === activePartnerId;
                 const pSpent =
@@ -616,7 +621,7 @@ export const CalculatorView: React.FC<CalculatorViewProps> = ({
                     key={p.id}
                     type="button"
                     onClick={() => setActivePartnerId(p.id)}
-                    className={`flex items-center gap-2 py-2 px-3.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+                    className={`flex items-center gap-1.5 sm:gap-2 py-2 px-3 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                       isActive
                         ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30 font-extrabold'
                         : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
@@ -639,19 +644,19 @@ export const CalculatorView: React.FC<CalculatorViewProps> = ({
               <button
                 type="button"
                 onClick={handleAddPartner}
-                className="flex items-center gap-1 py-2 px-3 rounded-xl text-xs font-bold bg-slate-200/80 dark:bg-slate-800/80 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-dashed border-slate-400 dark:border-slate-600 cursor-pointer shrink-0 transition-colors"
+                className="flex items-center gap-1 py-2 px-2.5 sm:px-3 rounded-xl text-xs font-bold bg-slate-200/80 dark:bg-slate-800/80 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-dashed border-slate-400 dark:border-slate-600 cursor-pointer shrink-0 transition-colors"
                 title="Add Another Partner"
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span>Add Partner</span>
+                <span>Partner</span>
               </button>
             </div>
 
             {/* Active Partner Panel */}
-            <div className="bg-slate-50 dark:bg-slate-800/40 p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-700/80 space-y-4">
-              {/* Partner Config Row */}
-              <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
-                <div className="sm:col-span-5">
+            <div className="bg-slate-50 dark:bg-slate-800/40 p-3 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-700/80 space-y-3.5">
+              {/* Partner Config Row: Side-by-side in Portrait Mode */}
+              <div className="grid grid-cols-12 gap-2.5 sm:gap-3 items-end">
+                <div className="col-span-7 sm:col-span-5">
                   <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">
                     Partner Name
                   </label>
@@ -662,52 +667,53 @@ export const CalculatorView: React.FC<CalculatorViewProps> = ({
                       handleUpdatePartnerName(currentActivePartner.id, e.target.value)
                     }
                     placeholder="Partner Name"
-                    className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-1.5 text-sm font-bold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs sm:text-sm font-bold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
-                <div className="sm:col-span-4">
-                  <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">
+                <div className="col-span-5 sm:col-span-4">
+                  <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1 truncate">
                     Profit Share (%)
                   </label>
                   <input
                     type="number"
+                    inputMode="decimal"
                     step="any"
                     value={currentActivePartner.share}
                     onChange={(e) =>
                       handleUpdatePartnerShare(currentActivePartner.id, e.target.value)
                     }
                     placeholder="50"
-                    className="w-full font-mono bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-1.5 text-sm font-bold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full font-mono bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs sm:text-sm font-bold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
                 {partners.length > 1 && (
-                  <div className="sm:col-span-3">
+                  <div className="col-span-12 sm:col-span-3">
                     <button
                       type="button"
                       onClick={() => handleRemovePartner(currentActivePartner.id)}
-                      className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 dark:text-rose-300 border border-rose-200 dark:border-rose-900 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                      className="w-full flex items-center justify-center gap-1.5 px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 dark:text-rose-300 border border-rose-200 dark:border-rose-900 rounded-xl text-xs font-bold transition-all cursor-pointer"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
-                      <span>Remove</span>
+                      <span>Remove Partner</span>
                     </button>
                   </div>
                 )}
               </div>
 
-              {/* Quick Expense Preset Buttons */}
+              {/* Quick Expense Preset Buttons (Horizontal Scrollable on Portrait) */}
               <div>
                 <span className="block text-[10px] font-black uppercase text-slate-400 tracking-wider mb-1.5">
                   Quick Add Common Costs
                 </span>
-                <div className="flex flex-wrap gap-1.5">
+                <div className="flex sm:flex-wrap overflow-x-auto pb-1 gap-1.5">
                   {COMMON_EXPENSE_TEMPLATES.map((tmpl) => (
                     <button
                       key={tmpl}
                       type="button"
                       onClick={() => handleAddExpenseRow(currentActivePartner.id, tmpl)}
-                      className="text-[11px] font-semibold bg-white dark:bg-slate-900 hover:bg-blue-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 transition-colors cursor-pointer"
+                      className="shrink-0 text-[11px] font-semibold bg-white dark:bg-slate-900 hover:bg-blue-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1 transition-colors cursor-pointer whitespace-nowrap"
                     >
                       + {tmpl}
                     </button>
@@ -718,11 +724,13 @@ export const CalculatorView: React.FC<CalculatorViewProps> = ({
               {/* Itemized Expenses List */}
               <div className="space-y-2 pt-1">
                 <div className="flex items-center justify-between text-xs font-extrabold text-slate-600 dark:text-slate-300">
-                  <span>{currentActivePartner.name}&apos;s Itemized Spending</span>
+                  <span className="uppercase tracking-wide text-[11px]">
+                    {currentActivePartner.name}&apos;s Spending List
+                  </span>
                   <button
                     type="button"
                     onClick={() => handleAddExpenseRow(currentActivePartner.id, '')}
-                    className="flex items-center gap-1 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
+                    className="flex items-center gap-1 text-xs font-bold text-blue-600 dark:text-blue-400 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-2.5 py-1 rounded-lg hover:bg-blue-50 transition-colors cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" /> Add Expense
                   </button>
@@ -732,7 +740,7 @@ export const CalculatorView: React.FC<CalculatorViewProps> = ({
                   {currentActivePartner.expenses.map((item) => (
                     <div
                       key={item.id}
-                      className="flex items-center gap-2 bg-white dark:bg-slate-900 p-2 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xs"
+                      className="flex items-center gap-1.5 sm:gap-2 bg-white dark:bg-slate-900 p-2 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xs"
                     >
                       <input
                         type="text"
@@ -744,15 +752,16 @@ export const CalculatorView: React.FC<CalculatorViewProps> = ({
                             e.target.value
                           )
                         }
-                        placeholder="Expense Name (e.g. Tires, Buffing, PMS, Gas)"
-                        className="flex-1 text-xs sm:text-sm text-slate-900 dark:text-white px-2 py-1 outline-none bg-transparent font-medium"
+                        placeholder="Expense (e.g. Tires, PMS, Gas)"
+                        className="flex-1 min-w-0 text-xs sm:text-sm text-slate-900 dark:text-white px-1.5 py-1 outline-none bg-transparent font-semibold"
                       />
-                      <div className="w-32 sm:w-40 flex items-center gap-1 border-l border-slate-200 dark:border-slate-700 pl-2">
-                        <span className="text-xs text-slate-400 font-mono">
+                      <div className="w-28 sm:w-36 shrink-0 flex items-center gap-1 border-l border-slate-200 dark:border-slate-700 pl-2">
+                        <span className="text-[11px] text-slate-400 font-mono shrink-0">
                           {currency}
                         </span>
                         <input
                           type="number"
+                          inputMode="decimal"
                           step="any"
                           value={item.value}
                           onChange={(e) =>
@@ -763,7 +772,7 @@ export const CalculatorView: React.FC<CalculatorViewProps> = ({
                             )
                           }
                           placeholder="0.00"
-                          className="w-full font-mono text-xs sm:text-sm font-bold text-slate-900 dark:text-white outline-none bg-transparent"
+                          className="w-full min-w-0 font-mono text-xs sm:text-sm font-bold text-right text-slate-900 dark:text-white outline-none bg-transparent"
                         />
                       </div>
                       <button
@@ -771,7 +780,7 @@ export const CalculatorView: React.FC<CalculatorViewProps> = ({
                         onClick={() =>
                           handleRemoveExpenseRow(currentActivePartner.id, item.id!)
                         }
-                        className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors cursor-pointer"
+                        className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors cursor-pointer shrink-0"
                         title="Remove Expense"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -792,47 +801,47 @@ export const CalculatorView: React.FC<CalculatorViewProps> = ({
           </div>
 
           {/* Auto Backup Toggle Checkbox */}
-          <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-800 text-xs">
+          <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-800 text-xs gap-2">
             <label className="flex items-center gap-2 cursor-pointer select-none">
               <input
                 type="checkbox"
                 checked={autoBackupEnabled}
                 onChange={(e) => onToggleAutoBackup(e.target.checked)}
-                className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-slate-300 dark:border-slate-700 cursor-pointer"
+                className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-slate-300 dark:border-slate-700 cursor-pointer shrink-0"
               />
               <span className="font-bold text-slate-700 dark:text-slate-300">
-                Auto-download JSON backup file on save
+                Auto-download backup file on save
               </span>
             </label>
             <span className="text-[11px] text-slate-400 dark:text-slate-500 hidden sm:inline">
-              Safeguards all vehicle records
+              Automatic JSON export
             </span>
           </div>
 
-          {/* Bottom Action Buttons */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+          {/* Bottom Action Buttons (Side-by-side even in Portrait Mode) */}
+          <div className="flex items-center gap-2.5 sm:gap-3 pt-1">
             <button
               type="button"
               onClick={handleSave}
-              className="flex items-center justify-center gap-2 py-3 px-6 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-extrabold text-sm rounded-2xl shadow-lg shadow-blue-600/30 transition-all cursor-pointer active:scale-98"
+              className="flex-1 flex items-center justify-center gap-2 py-3.5 px-4 sm:px-6 bg-slate-900 hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-extrabold text-sm rounded-xl sm:rounded-2xl shadow-lg transition-all cursor-pointer active:scale-98"
             >
-              <Save className="w-4 h-4 text-amber-300" />
-              <span>{activeUnitId ? 'Update Vehicle Record' : 'Save / Add New Deal'}</span>
+              <Save className="w-4 h-4 text-amber-300 shrink-0" />
+              <span>Save / Update Record</span>
             </button>
 
             <button
               type="button"
               onClick={handleResetForm}
-              className="flex items-center justify-center gap-2 py-3 px-6 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-sm rounded-2xl border border-slate-300/80 dark:border-slate-700 transition-all cursor-pointer active:scale-98"
+              className="shrink-0 flex items-center justify-center gap-1.5 py-3.5 px-4 sm:px-6 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-sm rounded-xl sm:rounded-2xl border border-slate-300/80 dark:border-slate-700 transition-all cursor-pointer active:scale-98"
             >
               <RotateCcw className="w-4 h-4 text-slate-400" />
-              <span>Reset Form</span>
+              <span>Reset</span>
             </button>
           </div>
         </div>
 
         {/* RIGHT COLUMN: Live Tag, Partner Payouts, Profit & Outlay Cards (5 cols) */}
-        <div className="lg:col-span-5 sticky top-20">
+        <div className="lg:col-span-5 lg:sticky lg:top-20">
           <SummaryCard
             title={fullTitle}
             plate={displayPlate}
