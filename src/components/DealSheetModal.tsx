@@ -7,18 +7,20 @@ interface DealSheetModalProps {
   record: VehicleRecord | null;
   isOpen: boolean;
   onClose: () => void;
+  businessName: string;
 }
 
 export const DealSheetModal: React.FC<DealSheetModalProps> = ({
   record,
   isOpen,
   onClose,
+  businessName,
 }) => {
   const previewRef = useRef<HTMLDivElement>(null);
 
   if (!isOpen || !record) return null;
 
-  const docHtml = generateFullHtmlDocument(record);
+  const docHtml = generateFullHtmlDocument(record, businessName);
 
   const getFullStandaloneDocument = () => {
     return `<!DOCTYPE html>
@@ -26,7 +28,7 @@ export const DealSheetModal: React.FC<DealSheetModalProps> = ({
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BelBros Settlement - ${record.plate || 'Vehicle'}</title>
+  <title>${businessName} Settlement - ${record.plate || 'Vehicle'}</title>
   <style>
     body { font-family: system-ui, -apple-system, sans-serif; padding: 24px; color: #0f172a; background: #ffffff; }
     .mono { font-family: monospace; }
@@ -48,7 +50,8 @@ export const DealSheetModal: React.FC<DealSheetModalProps> = ({
 
   const handleShareDirect = async () => {
     const fullDoc = getFullStandaloneDocument();
-    const fileName = `BelBros-Settlement-${record.plate || 'Car'}.html`;
+    const safeSlug = (businessName || 'Car-Trading').replace(/[^a-zA-Z0-9]+/g, '-');
+    const fileName = `${safeSlug}-Settlement-${record.plate || 'Car'}.html`;
 
     try {
       if (typeof navigator !== 'undefined' && navigator.share) {
@@ -56,7 +59,7 @@ export const DealSheetModal: React.FC<DealSheetModalProps> = ({
         const file = new File([fullDoc], fileName, { type: 'text/html' });
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           await navigator.share({
-            title: `BelBros Deal Settlement (${record.plate})`,
+            title: `${businessName} Deal Settlement (${record.plate})`,
             files: [file],
           });
           return;
@@ -68,8 +71,8 @@ export const DealSheetModal: React.FC<DealSheetModalProps> = ({
           .join(', ');
 
         await navigator.share({
-          title: `BelBros Settlement - ${record.plate}`,
-          text: `🚗 BelBros Deal Settlement: ${record.title} (${record.plate})\n💰 Selling Price: ${record.currency} ${(record.sell || 0).toLocaleString()}\n📈 Net Profit: ${record.currency} ${(record.profit || 0).toLocaleString()}\n👤 Take-Home: ${partnerSummary}`,
+          title: `${businessName} Settlement - ${record.plate}`,
+          text: `🚗 ${businessName} Deal Settlement: ${record.title} (${record.plate})\n💰 Selling Price: ${record.currency} ${(record.sell || 0).toLocaleString()}\n📈 Net Profit: ${record.currency} ${(record.profit || 0).toLocaleString()}\n👤 Take-Home: ${partnerSummary}`,
         });
         return;
       }
@@ -87,11 +90,12 @@ export const DealSheetModal: React.FC<DealSheetModalProps> = ({
 
   const handleDownloadHtml = () => {
     const fullDoc = getFullStandaloneDocument();
+    const safeSlug = (businessName || 'Car-Trading').replace(/[^a-zA-Z0-9]+/g, '-');
     const blob = new Blob([fullDoc], { type: 'text/html;charset=utf-8' });
     const blobUrl = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = blobUrl;
-    a.download = `BelBros-Settlement-${record.plate || 'Car'}.html`;
+    a.download = `${safeSlug}-Settlement-${record.plate || 'Car'}.html`;
     document.body.appendChild(a);
     a.click();
     setTimeout(() => {

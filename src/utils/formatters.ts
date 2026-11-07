@@ -49,7 +49,10 @@ export function calculateDays(
   }
 }
 
-export function generateFullHtmlDocument(record: VehicleRecord): string {
+export function generateFullHtmlDocument(
+  record: VehicleRecord,
+  businessName: string = 'BelBros Car Trading'
+): string {
   let partnerSummaryRows = '';
   let partnerExpenseColumns = '';
   let partnerSignatures = '';
@@ -119,7 +122,7 @@ export function generateFullHtmlDocument(record: VehicleRecord): string {
               style="width: 26px; height: 26px; vertical-align: middle;"
             />
             <h2 style="font-size: 16pt; font-weight: 900; margin: 0; color: #0f172a; letter-spacing: -0.02em;">
-              BelBros Car Trading
+              ${businessName}
             </h2>
           </div>
           <p style="font-size: 9.5pt; color: #475569; margin: 0; font-weight: 600;">
@@ -205,7 +208,7 @@ export function generateFullHtmlDocument(record: VehicleRecord): string {
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 24px;">
           ${partnerSignatures}
         </div>
-        <p style="font-size: 7.5pt; color: #94a3b8; text-align: center; margin-top: 20px;">Generated via BelBros Car Trading System &bull; Confidential Business Record</p>
+        <p style="font-size: 7.5pt; color: #94a3b8; text-align: center; margin-top: 20px;">Generated via ${businessName} System &bull; Confidential Business Record</p>
       </div>
     </div>
   `;

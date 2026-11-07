@@ -7,6 +7,8 @@ import {
   saveTheme,
   getStoredAutoBackup,
   saveAutoBackup,
+  getStoredBusinessName,
+  saveBusinessName,
 } from './utils/storage';
 import { normalizePlate } from './utils/formatters';
 import { Header } from './components/Header';
@@ -32,6 +34,7 @@ export default function App() {
     }
     return saved;
   });
+  const [businessName, setBusinessName] = useState<string>(getStoredBusinessName);
   const [records, setRecords] = useState<VehicleRecord[]>(getStoredRecords);
   const [activeTab, setActiveTab] = useState<MainViewTab>('calculator');
   const [activeUnitId, setActiveUnitId] = useState<number | null>(null);
@@ -40,6 +43,19 @@ export default function App() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [toastType, setToastType] = useState<'success' | 'info'>('success');
   const [autoBackupEnabled, setAutoBackupEnabled] = useState<boolean>(getStoredAutoBackup);
+
+  // Sync document title with custom Car Trading business name
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.title = `${businessName} | Buy & Sell Settlement & Fleet Manager`;
+    }
+  }, [businessName]);
+
+  const handleChangeBusinessName = (newName: string) => {
+    setBusinessName(newName);
+    saveBusinessName(newName);
+    showToast(`✔ Business name updated to "${newName}"`, 'success');
+  };
 
   // Apply dark mode class to root HTML element
   useEffect(() => {
@@ -90,8 +106,9 @@ export default function App() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     const dateStr = new Date().toISOString().split('T')[0];
+    const safeSlug = (businessName || 'belbros').toLowerCase().replace(/[^a-z0-9]+/g, '-');
     a.href = url;
-    a.download = `belbros-backup-${dateStr}.json`;
+    a.download = `${safeSlug}-backup-${dateStr}.json`;
     document.body.appendChild(a);
     a.click();
     setTimeout(() => {
@@ -312,6 +329,8 @@ export default function App() {
         theme={theme}
         onToggleTheme={toggleTheme}
         totalSavedUnits={records.length}
+        businessName={businessName}
+        onChangeBusinessName={handleChangeBusinessName}
       />
 
       {/* Navigation Switcher */}
@@ -362,6 +381,7 @@ export default function App() {
         record={modalRecord}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+        businessName={businessName}
       />
 
       {/* Toast Alerts */}

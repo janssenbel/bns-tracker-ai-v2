@@ -53,6 +53,9 @@ export function saveTheme(theme: 'dark' | 'light'): void {
   localStorage.setItem(THEME_KEY, theme);
 }
 
+const BUSINESS_NAME_KEY = 'belbros_business_name';
+export const DEFAULT_BUSINESS_NAME = 'BelBros Car Trading';
+
 export function getStoredAutoBackup(): boolean {
   const val = localStorage.getItem(AUTO_BACKUP_KEY);
   return val === null ? true : val === 'true';
@@ -61,3 +64,22 @@ export function getStoredAutoBackup(): boolean {
 export function saveAutoBackup(enabled: boolean): void {
   localStorage.setItem(AUTO_BACKUP_KEY, enabled ? 'true' : 'false');
 }
+
+export function getStoredBusinessName(): string {
+  try {
+    const saved = localStorage.getItem(BUSINESS_NAME_KEY);
+    return saved && saved.trim() ? saved.trim() : DEFAULT_BUSINESS_NAME;
+  } catch {
+    return DEFAULT_BUSINESS_NAME;
+  }
+}
+
+export function saveBusinessName(name: string): void {
+  try {
+    const trimmed = name.trim() || DEFAULT_BUSINESS_NAME;
+    localStorage.setItem(BUSINESS_NAME_KEY, trimmed);
+  } catch (err) {
+    console.error('Failed to save business name', err);
+  }
+}
+
