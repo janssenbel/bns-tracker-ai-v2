@@ -101,7 +101,7 @@ export function generateFullHtmlDocument(record: VehicleRecord): string {
       <div style="border-bottom: 2.5px solid #0f172a; padding-bottom: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: flex-end;">
         <div>
           <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
-  <span style="font-size: 20pt; font-family: Arial, sans-serif;">🚗</span>
+  <span style="font-size: 20pt; font-family: Arial, sans-serif;">🚘</span>
 
   <h2 style="font-size: 20pt; font-weight: 900; margin: 0; color: #0f172a; letter-spacing: -0.02em;">
     BelBros Car Trading
