@@ -18,7 +18,7 @@ export const Header: React.FC<HeaderProps> = ({ theme, onToggleTheme, totalSaved
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl overflow-hidden shadow-md shadow-amber-500/20 ring-2 ring-amber-400/40 shrink-0 bg-slate-950">
               <img
-                src="/apple-touch-icon.png"
+                src={`${import.meta.env.BASE_URL}apple-touch-icon.png`}
                 alt="BelBros Icon"
                 className="w-full h-full object-cover"
               />
