@@ -14,9 +14,9 @@
     <!-- Apple Touch Icons & iOS Homescreen Configuration -->
     <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon-180x180.png" />
-    <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png" />
-    <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png" />
-    <link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="./apple-touch-icon-152x152.png" />
+    <link rel="apple-touch-icon" sizes="120x120" href="./apple-touch-icon-120x120.png" />
+    <link rel="apple-touch-icon-precomposed" href="./apple-touch-icon.png" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="BelBros" />
@@ -31,8 +31,25 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Instant Synchronous Theme Initialization -->
+    <script>
+      (function() {
+        try {
+          var saved = localStorage.getItem('belbros_theme');
+          var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (saved === 'dark' || (!saved && prefersDark)) {
+            document.documentElement.classList.add('dark');
+            document.documentElement.style.colorScheme = 'dark';
+          } else {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.style.colorScheme = 'light';
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
-  <body class="bg-slate-100 text-slate-900 antialiased selection:bg-amber-300 selection:text-amber-950">
+  <body class="bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased selection:bg-amber-300 selection:text-amber-950 transition-colors">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

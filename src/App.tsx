@@ -16,9 +16,22 @@ import { InventoryView } from './components/InventoryView';
 import { TotalProfitView } from './components/TotalProfitView';
 import { DealSheetModal } from './components/DealSheetModal';
 import { Toast } from './components/Toast';
+import { OfflineIndicator } from './components/OfflineIndicator';
 
 export default function App() {
-  const [theme, setTheme] = useState<'dark' | 'light'>(getStoredTheme);
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    const saved = getStoredTheme();
+    if (typeof document !== 'undefined') {
+      if (saved === 'dark') {
+        document.documentElement.classList.add('dark');
+        document.body.classList.add('dark-mode');
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.body.classList.remove('dark-mode');
+      }
+    }
+    return saved;
+  });
   const [records, setRecords] = useState<VehicleRecord[]>(getStoredRecords);
   const [activeTab, setActiveTab] = useState<MainViewTab>('calculator');
   const [activeUnitId, setActiveUnitId] = useState<number | null>(null);
@@ -41,7 +54,16 @@ export default function App() {
   }, [theme]);
 
   const toggleTheme = () => {
-    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+    const nextTheme = theme === 'dark' ? 'light' : 'dark';
+    if (nextTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+      document.body.classList.add('dark-mode');
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.body.classList.remove('dark-mode');
+    }
+    saveTheme(nextTheme);
+    setTheme(nextTheme);
   };
 
   const showToast = (message: string, type: 'success' | 'info' = 'success') => {
@@ -282,6 +304,9 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors selection:bg-amber-300 selection:text-amber-950">
+      {/* Offline Status Banner */}
+      <OfflineIndicator />
+
       {/* Header */}
       <Header
         theme={theme}
