@@ -1,0 +1,6 @@
+{
+  "name": "BelBros Car Trading - Buy & Sell Settlement & Inventory Manager",
+  "description": "BelBros Car Trading (BNS) management app for calculating vehicle flip margins, multi-partner capital outlay, profit sharing splits, deal settlement statements, and fleet inventory tracking.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
