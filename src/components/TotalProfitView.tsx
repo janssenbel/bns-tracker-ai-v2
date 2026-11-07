@@ -26,7 +26,7 @@ export const TotalProfitView: React.FC<TotalProfitViewProps> = ({
   const [sortField, setSortField] = useState<'profit' | 'margin' | 'sell' | 'capital'>('profit');
   const [sortAsc, setSortAsc] = useState<boolean>(false);
 
-  const cur = (records[0] && records[0].currency) || '₱';
+  const cur = '₱';
 
   let totalProfit = 0;
   let totalRevenue = 0;
@@ -37,7 +37,14 @@ export const TotalProfitView: React.FC<TotalProfitViewProps> = ({
 
   const partnerAccumulator: Record<
     string,
-    { name: string; totalSpent: number; totalProfitShare: number; totalPayout: number }
+    {
+      name: string;
+      totalSpent: number;
+      totalProfitShare: number;
+      totalPayout: number;
+      shareSum: number;
+      dealCount: number;
+    }
   > = {};
 
   records.forEach((r) => {
@@ -67,11 +74,15 @@ export const TotalProfitView: React.FC<TotalProfitViewProps> = ({
             totalSpent: 0,
             totalProfitShare: 0,
             totalPayout: 0,
+            shareSum: 0,
+            dealCount: 0,
           };
         }
         partnerAccumulator[key].totalSpent += p.spent || 0;
         partnerAccumulator[key].totalProfitShare += p.profitPortion || 0;
         partnerAccumulator[key].totalPayout += p.payout || 0;
+        partnerAccumulator[key].shareSum += p.share || 0;
+        partnerAccumulator[key].dealCount += 1;
       });
     }
   });
@@ -108,7 +119,7 @@ export const TotalProfitView: React.FC<TotalProfitViewProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-slate-100 dark:border-slate-800">
           <div>
             <h2 className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-              Total Net Profit &amp; Business Summary
+              Total Net Profit (₱) &amp; Business Summary
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
               Cumulative financial breakdown, total profits, and partner returns across all saved car transactions.
@@ -132,7 +143,7 @@ export const TotalProfitView: React.FC<TotalProfitViewProps> = ({
           <div className="bg-slate-50 dark:bg-slate-800/50 p-3.5 sm:p-5 rounded-2xl border-l-4 border-l-emerald-500 border-t border-r border-b border-slate-200/80 dark:border-slate-700/80 flex flex-col justify-between min-w-0">
             <div>
               <span className="text-[10px] sm:text-xs font-extrabold uppercase text-slate-400 tracking-wider block truncate">
-                Total Net Profit
+                Total Net Profit (₱)
               </span>
               <div
                 className={`text-base sm:text-2xl lg:text-3xl font-black font-mono mt-1 truncate ${
@@ -245,38 +256,78 @@ export const TotalProfitView: React.FC<TotalProfitViewProps> = ({
             {Object.keys(partnerAccumulator).length > 0 ? (
               Object.keys(partnerAccumulator).map((key) => {
                 const p = partnerAccumulator[key];
+                const isPartnerProfit = p.totalProfitShare >= 0;
+                const profitSharePct =
+                  totalProfit !== 0
+                    ? (p.totalProfitShare / totalProfit) * 100
+                    : p.dealCount > 0
+                    ? p.shareSum / p.dealCount
+                    : 0;
+                const returnOnCapitalPct =
+                  p.totalSpent > 0 ? (p.totalProfitShare / p.totalSpent) * 100 : 0;
+
                 return (
                   <div
                     key={p.name}
-                    className="bg-slate-50 dark:bg-slate-800/50 p-3.5 sm:p-4 rounded-2xl border border-slate-200 dark:border-slate-700 flex flex-col justify-between space-y-1.5 shadow-xs"
+                    className="bg-slate-50 dark:bg-slate-800/50 p-3.5 sm:p-4 rounded-2xl border border-slate-200 dark:border-slate-700 flex flex-col justify-between space-y-2.5 shadow-xs"
                   >
-                    <div className="flex items-center justify-between">
-                      <span className="font-extrabold text-xs sm:text-sm text-blue-600 dark:text-blue-400 uppercase flex items-center gap-1.5">
+                    {/* Partner Header & % of Profit Badge */}
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-extrabold text-xs sm:text-sm text-blue-600 dark:text-blue-400 uppercase flex items-center gap-1.5 truncate">
                         👤 {p.name}
                       </span>
-                      <span className="text-[11px] text-slate-400 font-semibold">Cumulative Return</span>
+                      <span className="px-2 py-0.5 rounded-full text-[11px] font-mono font-extrabold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/70 shrink-0">
+                        {profitSharePct.toFixed(1)}% of Profit
+                      </span>
                     </div>
 
-                    <div className="text-xl sm:text-2xl font-black font-mono text-blue-600 dark:text-blue-400 my-0.5">
-                      {formatCurrency(p.totalPayout, cur)}
-                    </div>
-
-                    <div className="text-[11px] sm:text-xs font-mono text-slate-500 dark:text-slate-400 pt-2 border-t border-slate-200 dark:border-slate-700 space-y-1">
-                      <div className="flex justify-between">
-                        <span>Total Capital Invested:</span>
-                        <span className="font-semibold">{formatCurrency(p.totalSpent, cur)}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>+ Total Profit Earned:</span>
-                        <strong
-                          className={
-                            p.totalProfitShare >= 0
-                              ? 'text-emerald-600 dark:text-emerald-400'
-                              : 'text-rose-600 dark:text-rose-400'
-                          }
+                    {/* Emphasized Total Profit Earned Hero Box */}
+                    <div
+                      className={`p-3 rounded-xl border ${
+                        isPartnerProfit
+                          ? 'bg-emerald-50/80 dark:bg-emerald-950/30 border-emerald-200/80 dark:border-emerald-800/60'
+                          : 'bg-rose-50/80 dark:bg-rose-950/30 border-rose-200/80 dark:border-rose-800/60'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-2 mb-0.5">
+                        <span className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                          Total Profit Earned
+                        </span>
+                        <span
+                          className={`text-[11px] font-mono font-extrabold ${
+                            isPartnerProfit
+                              ? 'text-emerald-700 dark:text-emerald-300'
+                              : 'text-rose-700 dark:text-rose-300'
+                          }`}
                         >
-                          {formatCurrency(p.totalProfitShare, cur)}
-                        </strong>
+                          {returnOnCapitalPct >= 0 ? '+' : ''}
+                          {returnOnCapitalPct.toFixed(1)}% ROI
+                        </span>
+                      </div>
+                      <div
+                        className={`text-xl sm:text-2xl font-black font-mono tracking-tight truncate ${
+                          isPartnerProfit
+                            ? 'text-emerald-600 dark:text-emerald-400'
+                            : 'text-rose-600 dark:text-rose-400'
+                        }`}
+                      >
+                        {formatCurrency(p.totalProfitShare, cur)}
+                      </div>
+                    </div>
+
+                    {/* Secondary Breakdown: Capital Invested & Cumulative Return */}
+                    <div className="text-[11px] sm:text-xs font-mono text-slate-500 dark:text-slate-400 pt-1.5 border-t border-slate-200 dark:border-slate-700 space-y-1">
+                      <div className="flex justify-between gap-2">
+                        <span>Total Capital Invested:</span>
+                        <span className="font-semibold text-slate-700 dark:text-slate-300">
+                          {formatCurrency(p.totalSpent, cur)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between gap-2">
+                        <span>Total Cumulative Return:</span>
+                        <span className="font-bold text-blue-600 dark:text-blue-400">
+                          {formatCurrency(p.totalPayout, cur)}
+                        </span>
                       </div>
                     </div>
                   </div>

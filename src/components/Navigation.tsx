@@ -1,6 +1,6 @@
 import React from 'react';
 import { MainViewTab } from '../types';
-import { Car, BookOpen, DollarSign } from 'lucide-react';
+import { Car, BookOpen, PhilippinePeso } from 'lucide-react';
 
 interface NavigationProps {
   activeTab: MainViewTab;
@@ -32,7 +32,7 @@ export const Navigation: React.FC<NavigationProps> = ({
       id: 'summary' as MainViewTab,
       label: 'Total Profit',
       subtitle: 'Portfolio Overview',
-      icon: DollarSign,
+      icon: PhilippinePeso,
       badge: null,
     },
   ];
