@@ -101,10 +101,16 @@ export function generateFullHtmlDocument(record: VehicleRecord): string {
       <div style="border-bottom: 2.5px solid #0f172a; padding-bottom: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: flex-end;">
         <div>
           <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
-            <span style="font-size: 16pt;">🚗</span>
-            <h2 style="font-size: 20pt; font-weight: 900; margin: 0; color: #0f172a; letter-spacing: -0.02em;">BelBros Car Trading</h2>
-          </div>
-          <p style="font-size: 10pt; color: #475569; margin: 0; font-weight: 600;">Official Vehicle Deal Settlement Statement</p>
+  <span style="font-size: 20pt; font-family: Arial, sans-serif;">🚗</span>
+
+  <h2 style="font-size: 20pt; font-weight: 900; margin: 0; color: #0f172a; letter-spacing: -0.02em;">
+    BelBros Car Trading
+  </h2>
+</div>
+
+<p style="font-size: 10pt; color: #475569; margin: 0; font-weight: 600;">
+  Official Vehicle Deal Settlement Statement
+</p>
         </div>
         <div style="text-align: right;">
           <span style="display: inline-block; font-family: monospace; font-weight: 800; font-size: 13pt; padding: 4px 12px; border-radius: 6px; background: #fef08a; color: #713f12; border: 1.5px solid #eab308;">
