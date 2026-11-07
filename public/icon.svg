@@ -1,0 +1,130 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="50%" stop-color="#0b1120"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+
+    <!-- Gold Metallic Gradient -->
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="35%" stop-color="#facc15"/>
+      <stop offset="70%" stop-color="#eab308"/>
+      <stop offset="100%" stop-color="#ca8a04"/>
+    </linearGradient>
+
+    <!-- Accent Gold Glow -->
+    <linearGradient id="goldGlow" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fde047" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#eab308" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Inner Plate Shield Gradient -->
+    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Full Bleed Background (Required for iOS & Maskable) -->
+  <rect width="512" height="512" rx="115" fill="url(#bgGrad)"/>
+
+  <!-- Subtle Outer Border Accent -->
+  <rect x="12" y="12" width="488" height="488" rx="103" fill="none" stroke="url(#goldGrad)" stroke-width="6" opacity="0.85"/>
+
+  <!-- Top Glass Highlight Reflection -->
+  <path d="M 16 115 C 16 60, 60 16, 115 16 L 397 16 C 452 16, 496 60, 496 115 L 496 220 Q 256 270 16 220 Z" fill="url(#goldGlow)" opacity="0.4"/>
+
+  <!-- Center Shield / Plate Container -->
+  <rect x="56" y="56" width="400" height="400" rx="60" fill="url(#shieldGrad)" stroke="#334155" stroke-width="3"/>
+
+  <!-- CAR EMBLEM ICON -->
+  <g transform="translate(76, 100)">
+    <!-- Car Body / Silhouette in Metallic Gold -->
+    <!-- Stylized modern sports SUV / coupe silhouette -->
+    <path d="M 40 180 
+             L 75 180 
+             C 80 155, 102 135, 130 135 
+             C 158 135, 180 155, 185 180 
+             L 275 180 
+             C 280 155, 302 135, 330 135 
+             C 358 135, 380 155, 385 180 
+             L 410 180 
+             C 418 180, 425 173, 425 165 
+             L 425 130 
+             C 425 118, 416 108, 404 105 
+             L 345 92 
+             L 285 30 
+             C 278 22, 268 18, 258 18 
+             L 120 18 
+             C 108 18, 98 25, 93 35 
+             L 52 105 
+             L 30 115 
+             C 20 120, 15 130, 15 142 
+             L 15 165 
+             C 15 173, 22 180, 30 180 
+             Z" 
+          fill="url(#goldGrad)" 
+          stroke="#ca8a04" 
+          stroke-width="3"
+          stroke-linejoin="round"
+          transform="scale(0.8) translate(5, 10)"/>
+
+    <!-- Car Windows -->
+    <path d="M 125 35 
+             L 252 35 
+             L 298 88 
+             L 100 88 
+             Z" 
+          fill="#0b1120" 
+          opacity="0.92"
+          transform="scale(0.8) translate(5, 10)"/>
+
+    <!-- Window Divider Pillar -->
+    <line x1="168" y1="38" x2="162" y2="80" stroke="url(#goldGrad)" stroke-width="4"/>
+
+    <!-- Front Windshield Glare -->
+    <polygon points="108,80 128,40 134,40 114,80" fill="#ffffff" opacity="0.4"/>
+
+    <!-- Front Left Wheel Hub -->
+    <circle cx="109" cy="154" r="28" fill="#020617" stroke="url(#goldGrad)" stroke-width="5"/>
+    <circle cx="109" cy="154" r="14" fill="url(#goldGrad)"/>
+    <circle cx="109" cy="154" r="5" fill="#020617"/>
+
+    <!-- Rear Right Wheel Hub -->
+    <circle cx="269" cy="154" r="28" fill="#020617" stroke="url(#goldGrad)" stroke-width="5"/>
+    <circle cx="269" cy="154" r="14" fill="url(#goldGrad)"/>
+    <circle cx="269" cy="154" r="5" fill="#020617"/>
+
+    <!-- Headlight Beam / Accent -->
+    <path d="M 27 122 L 48 118 L 46 128 Z" fill="#ffffff" opacity="0.95"/>
+    <!-- Taillight Accent -->
+    <path d="M 340 112 L 344 112 L 344 124 L 338 124 Z" fill="#ef4444"/>
+  </g>
+
+  <!-- BRAND NAME BANNER -->
+  <g transform="translate(256, 360)">
+    <!-- Plate / Badge Background -->
+    <rect x="-160" y="-8" width="320" height="48" rx="10" fill="#fef08a" stroke="#eab308" stroke-width="3"/>
+    
+    <!-- Text: BELBROS -->
+    <text x="0" y="26" 
+          font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" 
+          font-size="28" 
+          font-weight="900" 
+          letter-spacing="4" 
+          fill="#713f12" 
+          text-anchor="middle">BELBROS</text>
+  </g>
+
+  <!-- SUBTITLE: CAR TRADING -->
+  <text x="256" y="430" 
+        font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" 
+        font-size="16" 
+        font-weight="800" 
+        letter-spacing="5" 
+        fill="#94a3b8" 
+        text-anchor="middle">BUY &amp; SELL (BNS)</text>
+</svg>
