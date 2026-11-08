@@ -40,7 +40,7 @@ const COMMON_EXPENSE_TEMPLATES = [
 const createDefaultPartners = (): PartnerWorkingState[] => [
   {
     id: 'p1',
-    name: 'Janssen',
+    name: '',
     share: 50,
     expenses: [
       { id: 'e1', name: 'Vehicle Acquisition / Buy Share', value: '' },
@@ -50,7 +50,7 @@ const createDefaultPartners = (): PartnerWorkingState[] => [
   },
   {
     id: 'p2',
-    name: 'Ralph',
+    name: '',
     share: 50,
     expenses: [
       { id: 'e4', name: 'Vehicle Acquisition / Buy Share', value: '' },
@@ -169,7 +169,7 @@ export const CalculatorView: React.FC<CalculatorViewProps> = ({
   let totalCapital = 0;
   const partnerSnapshots: PartnerSnapshot[] = [];
 
-  partners.forEach((partner) => {
+  partners.forEach((partner, idx) => {
     totalSharesPct += partner.share || 0;
     let partnerSpent = 0;
     const nonZeroExpenses: { name: string; amount: number }[] = [];
@@ -186,7 +186,7 @@ export const CalculatorView: React.FC<CalculatorViewProps> = ({
 
     partnerSnapshots.push({
       id: partner.id,
-      name: partner.name,
+      name: partner.name.trim() || `Partner ${idx + 1}`,
       share: partner.share,
       spent: partnerSpent,
       profitPortion: 0,
@@ -214,7 +214,7 @@ export const CalculatorView: React.FC<CalculatorViewProps> = ({
     const evenShare = parseFloat((100 / count).toFixed(1));
     const newPartner: PartnerWorkingState = {
       id: newId,
-      name: `Partner ${count}`,
+      name: '',
       share: evenShare,
       expenses: [
         { id: `exp_${Date.now()}_1`, name: 'Vehicle Acquisition / Buy Share', value: '' },
@@ -239,7 +239,7 @@ export const CalculatorView: React.FC<CalculatorViewProps> = ({
 
   const handleUpdatePartnerName = (id: string, name: string) => {
     setPartners(
-      partners.map((p) => (p.id === id ? { ...p, name: name || 'Partner' } : p))
+      partners.map((p) => (p.id === id ? { ...p, name } : p))
     );
   };
 
@@ -612,10 +612,11 @@ export const CalculatorView: React.FC<CalculatorViewProps> = ({
 
             {/* Partner Tabs Bar */}
             <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1">
-              {partners.map((p) => {
+              {partners.map((p, idx) => {
                 const isActive = p.id === activePartnerId;
                 const pSpent =
                   partnerSnapshots.find((ps) => ps.id === p.id)?.spent || 0;
+                const displayName = p.name.trim() || `Partner ${idx + 1}`;
                 return (
                   <button
                     key={p.id}
@@ -627,7 +628,7 @@ export const CalculatorView: React.FC<CalculatorViewProps> = ({
                         : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
                     }`}
                   >
-                    <span>👤 {p.name}</span>
+                    <span>👤 {displayName}</span>
                     <span
                       className={`font-mono text-[11px] px-1.5 py-0.5 rounded-md ${
                         isActive
@@ -666,7 +667,7 @@ export const CalculatorView: React.FC<CalculatorViewProps> = ({
                     onChange={(e) =>
                       handleUpdatePartnerName(currentActivePartner.id, e.target.value)
                     }
-                    placeholder="Partner Name"
+                    placeholder="Enter partner name"
                     className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs sm:text-sm font-bold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -725,7 +726,7 @@ export const CalculatorView: React.FC<CalculatorViewProps> = ({
               <div className="space-y-2 pt-1">
                 <div className="flex items-center justify-between text-xs font-extrabold text-slate-600 dark:text-slate-300">
                   <span className="uppercase tracking-wide text-[11px]">
-                    {currentActivePartner.name}&apos;s Spending List
+                    {currentActivePartner.name.trim() || `Partner ${partners.findIndex((p) => p.id === currentActivePartner.id) + 1}`}&apos;s Spending List
                   </span>
                   <button
                     type="button"

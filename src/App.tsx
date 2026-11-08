@@ -330,7 +330,6 @@ export default function App() {
         onToggleTheme={toggleTheme}
         totalSavedUnits={records.length}
         businessName={businessName}
-        onChangeBusinessName={handleChangeBusinessName}
       />
 
       {/* Navigation Switcher */}
@@ -364,6 +363,8 @@ export default function App() {
             onExportBackupJSON={() => handleExportBackupJSON(false)}
             onImportBackupJSON={handleImportBackupJSON}
             onExportCSV={handleExportCSV}
+            businessName={businessName}
+            onChangeBusinessName={handleChangeBusinessName}
           />
         )}
 
