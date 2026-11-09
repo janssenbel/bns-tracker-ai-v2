@@ -58,7 +58,7 @@ export const DEFAULT_BUSINESS_NAME = 'BelBros Car Trading';
 
 export function getStoredAutoBackup(): boolean {
   const val = localStorage.getItem(AUTO_BACKUP_KEY);
-  return val === null ? true : val === 'true';
+  return val === 'true';
 }
 
 export function saveAutoBackup(enabled: boolean): void {
