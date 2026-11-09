@@ -1,7 +1,10 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { VehicleRecord } from '../types';
 import { generateFullHtmlDocument } from '../utils/formatters';
-import { Share2, Printer, Download, X, FileText, Smartphone } from 'lucide-react';
+import { Share2, Printer, FileArchive, X, FileText, Smartphone, Loader2 } from 'lucide-react';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+import JSZip from 'jszip';
 
 interface DealSheetModalProps {
   record: VehicleRecord | null;
@@ -17,6 +20,7 @@ export const DealSheetModal: React.FC<DealSheetModalProps> = ({
   businessName,
 }) => {
   const previewRef = useRef<HTMLDivElement>(null);
+  const [isZipping, setIsZipping] = useState(false);
 
   if (!isOpen || !record) return null;
 
@@ -80,28 +84,89 @@ export const DealSheetModal: React.FC<DealSheetModalProps> = ({
       if ((err as Error)?.name === 'AbortError') return;
     }
 
-    // Fallback: download file
-    handleDownloadHtml();
+    // Fallback: download pdf in zip
+    handleDownloadPdfZip();
   };
 
   const handlePrint = () => {
     window.print();
   };
 
-  const handleDownloadHtml = () => {
-    const fullDoc = getFullStandaloneDocument();
-    const safeSlug = (businessName || 'Car-Trading').replace(/[^a-zA-Z0-9]+/g, '-');
-    const blob = new Blob([fullDoc], { type: 'text/html;charset=utf-8' });
-    const blobUrl = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = blobUrl;
-    a.download = `${safeSlug}-Settlement-${record.plate || 'Car'}.html`;
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => {
-      document.body.removeChild(a);
-      URL.revokeObjectURL(blobUrl);
-    }, 1000);
+  const handleDownloadPdfZip = async () => {
+    if (!previewRef.current || !record) return;
+    setIsZipping(true);
+
+    try {
+      const element = previewRef.current;
+      const safeSlug = (businessName || 'Car-Trading').replace(/[^a-zA-Z0-9]+/g, '-');
+      const baseFileName = `${safeSlug}-Settlement-${record.plate || 'Vehicle'}`;
+
+      // Render crisp canvas representation of the settlement statement
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+      });
+
+      // A4 format dimensions in points (595.28 x 841.89)
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'pt',
+        format: 'a4',
+      });
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const margin = 20;
+      const contentWidth = pdfWidth - margin * 2;
+      const contentHeight = (canvas.height * contentWidth) / canvas.width;
+
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+
+      let heightLeft = contentHeight;
+      let position = margin;
+
+      pdf.addImage(imgData, 'JPEG', margin, position, contentWidth, contentHeight);
+      heightLeft -= (pdfHeight - margin * 2);
+
+      while (heightLeft > 0) {
+        position = margin - (contentHeight - heightLeft);
+        pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', margin, position, contentWidth, contentHeight);
+        heightLeft -= (pdfHeight - margin * 2);
+      }
+
+      const pdfBlob = pdf.output('blob');
+
+      // Create ZIP archive containing the generated PDF
+      const zip = new JSZip();
+      zip.file(`${baseFileName}.pdf`, pdfBlob);
+
+      const zipBlob = await zip.generateAsync({
+        type: 'blob',
+        compression: 'DEFLATE',
+        compressionOptions: { level: 6 },
+      });
+
+      // Trigger file download
+      const blobUrl = URL.createObjectURL(zipBlob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = `${baseFileName}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(blobUrl);
+      }, 1500);
+    } catch (err) {
+      console.error('Error generating PDF zip archive:', err);
+      alert('Could not generate PDF zip archive. Please use Print to save as PDF directly.');
+    } finally {
+      setIsZipping(false);
+    }
   };
 
   return (
@@ -139,7 +204,7 @@ export const DealSheetModal: React.FC<DealSheetModalProps> = ({
           <div className="flex items-start gap-2 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 p-2.5 sm:p-3 rounded-xl text-[11px] sm:text-xs text-blue-900 dark:text-blue-300 mb-2.5 sm:mb-3">
             <Smartphone className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
             <div>
-              <strong className="font-bold">iPhone & Mobile Note:</strong> Tap <strong>&quot;Save to Files / Share&quot;</strong> to export to iOS Files, WhatsApp, or AirDrop, or tap <strong>&quot;Print&quot;</strong> for AirPrint / PDF.
+              <strong className="font-bold">iPhone & Mobile Note:</strong> Tap <strong>&quot;Save to Files / Share&quot;</strong> to export to iOS Files or WhatsApp, <strong>&quot;Print&quot;</strong> for AirPrint / PDF, or <strong>&quot;Download PDF (.zip)&quot;</strong> to download the PDF inside a ZIP archive.
             </div>
           </div>
 
@@ -164,11 +229,22 @@ export const DealSheetModal: React.FC<DealSheetModalProps> = ({
 
             <button
               type="button"
-              onClick={handleDownloadHtml}
-              className="flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 px-3 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 font-bold text-xs sm:text-sm rounded-xl transition-all cursor-pointer shadow-sm whitespace-nowrap"
+              disabled={isZipping}
+              onClick={handleDownloadPdfZip}
+              className="flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 px-3 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 font-bold text-xs sm:text-sm rounded-xl transition-all cursor-pointer shadow-sm whitespace-nowrap disabled:opacity-60 disabled:cursor-not-allowed"
+              title="Download official settlement statement PDF packed in a ZIP archive"
             >
-              <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-500 dark:text-slate-400 shrink-0" />
-              Download HTML
+              {isZipping ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600 animate-spin shrink-0" />
+                  <span>Zipping PDF...</span>
+                </>
+              ) : (
+                <>
+                  <FileArchive className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500 shrink-0" />
+                  <span>Download PDF (.zip)</span>
+                </>
+              )}
             </button>
           </div>
         </div>

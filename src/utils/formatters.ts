@@ -116,11 +116,7 @@ export function generateFullHtmlDocument(
       <div style="border-bottom: 2.5px solid #0f172a; padding-bottom: 12px; margin-bottom: 14px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 10px;">
         <div>
           <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
-            <img
-              src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f697.png"
-              alt="🚗"
-              style="width: 26px; height: 26px; vertical-align: middle;"
-            />
+            <span style="font-size: 22px; line-height: 1; display: inline-block; vertical-align: middle;">🚗</span>
             <h2 style="font-size: 16pt; font-weight: 900; margin: 0; color: #0f172a; letter-spacing: -0.02em;">
               ${businessName}
             </h2>
