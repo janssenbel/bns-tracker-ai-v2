@@ -53,7 +53,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
   const [draftName, setDraftName] = useState(businessName);
 
   const fileInputRef = React.useRef<HTMLInputElement>(null);
-  const iconUrl = `${import.meta.env.BASE_URL}apple-touch-icon.png`;
+  const iconUrl = `${import.meta.env.BASE_URL}apple-touch-icon.png?v=3`;
 
   const splitDisplayName = (name: string) => {
     const clean = (name || DEFAULT_BUSINESS_NAME).trim();
@@ -743,7 +743,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
 
             {/* Live Header Preview */}
             <div className="bg-slate-900 rounded-2xl p-3.5 border border-slate-800 flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl overflow-hidden ring-2 ring-amber-400/40 shrink-0 bg-slate-950">
+              <div className="w-9 h-9 rounded-xl overflow-hidden ring-2 ring-red-500/50 shrink-0 bg-red-600">
                 <img src={iconUrl} alt="Preview Icon" className="w-full h-full object-cover" />
               </div>
               <div className="min-w-0">

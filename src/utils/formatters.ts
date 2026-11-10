@@ -116,7 +116,7 @@ export function generateFullHtmlDocument(
       <div style="border-bottom: 2.5px solid #0f172a; padding-bottom: 12px; margin-bottom: 14px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 10px;">
         <div>
           <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
-            <span style="font-size: 22px; line-height: 1; display: inline-block; vertical-align: middle;">🚗</span>
+            <img src="${import.meta.env.BASE_URL}apple-touch-icon.png?v=3" alt="${businessName}" style="width: 28px; height: 28px; border-radius: 6px; object-fit: cover; display: inline-block; vertical-align: middle; background: #dc2626;" />
             <h2 style="font-size: 16pt; font-weight: 900; margin: 0; color: #0f172a; letter-spacing: -0.02em;">
               ${businessName}
             </h2>

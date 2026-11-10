@@ -16,7 +16,7 @@ export const Header: React.FC<HeaderProps> = ({
   businessName,
 }) => {
   const [showInstallGuide, setShowInstallGuide] = useState(false);
-  const iconUrl = `${import.meta.env.BASE_URL}apple-touch-icon.png`;
+  const iconUrl = `${import.meta.env.BASE_URL}apple-touch-icon.png?v=3`;
 
   // Split business name so first word is white and remaining words are highlighted in amber
   const splitDisplayName = (name: string) => {
@@ -39,7 +39,7 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="max-w-7xl mx-auto px-3.5 sm:px-6 py-2.5 sm:py-3.5 flex items-center justify-between gap-2">
           {/* Brand */}
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden shadow-md shadow-amber-500/20 ring-2 ring-amber-400/40 shrink-0 bg-slate-950">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden shadow-md shadow-red-600/25 ring-2 ring-red-500/50 shrink-0 bg-red-600">
               <img
                 src={iconUrl}
                 alt={`${businessName} Icon`}
@@ -117,7 +117,7 @@ export const Header: React.FC<HeaderProps> = ({
 
             {/* App Icon Preview */}
             <div className="flex flex-col items-center justify-center pt-2">
-              <div className="w-20 h-20 rounded-2xl overflow-hidden shadow-xl ring-4 ring-amber-400/40 mb-3 bg-slate-950">
+              <div className="w-20 h-20 rounded-2xl overflow-hidden shadow-xl ring-4 ring-red-500/50 mb-3 bg-red-600">
                 <img
                   src={iconUrl}
                   alt={`${businessName} iPhone App Icon`}
@@ -153,7 +153,7 @@ export const Header: React.FC<HeaderProps> = ({
                   3
                 </div>
                 <div>
-                  Tap <strong className="text-amber-300">Add</strong>. The golden car icon will appear on your iPhone screen!
+                  Tap <strong className="text-amber-300">Add</strong>. The red &amp; white car icon will appear on your iPhone screen!
                 </div>
               </div>
             </div>

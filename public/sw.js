@@ -1,5 +1,5 @@
 // BelBros Car Trading - Offline PWA Service Worker
-const CACHE_NAME = 'belbros-bns-v2';
+const CACHE_NAME = 'belbros-bns-v3';
 
 // Core assets to pre-cache immediately on install
 const PRECACHE_ASSETS = [
@@ -7,6 +7,7 @@ const PRECACHE_ASSETS = [
   './index.html',
   './manifest.json',
   './apple-touch-icon.png',
+  './apple-touch-icon.png?v=3',
   './apple-touch-icon-180x180.png',
   './apple-touch-icon-152x152.png',
   './apple-touch-icon-120x120.png',
@@ -15,8 +16,7 @@ const PRECACHE_ASSETS = [
   './pwa-maskable-512x512.png',
   './favicon-32x32.png',
   './favicon.ico',
-  './icon.svg',
-  'https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f697.png'
+  './icon.svg'
 ];
 
 // Install Event: pre-cache the app shell
