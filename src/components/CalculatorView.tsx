@@ -14,6 +14,7 @@ import {
   RotateCcw,
   AlertCircle,
   CheckCircle2,
+  X,
 } from 'lucide-react';
 
 interface CalculatorViewProps {
@@ -504,9 +505,22 @@ export const CalculatorView: React.FC<CalculatorViewProps> = ({
           {/* Dates & Holding Turnover (Compact 2-col on Portrait) */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3 bg-slate-50 dark:bg-slate-800/40 p-3 rounded-2xl border border-slate-200/80 dark:border-slate-700/80">
             <div className="min-w-0">
-              <label className="block text-[11px] font-extrabold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-1 truncate">
-                Date Bought
-              </label>
+              <div className="flex items-center justify-between gap-1 mb-1">
+                <label className="block text-[11px] font-extrabold uppercase tracking-wide text-slate-500 dark:text-slate-400 truncate">
+                  Date Bought
+                </label>
+                {dateBought && (
+                  <button
+                    type="button"
+                    onClick={() => setDateBought('')}
+                    className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[10px] font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-100 dark:hover:bg-rose-900/80 border border-rose-200 dark:border-rose-800/80 transition-colors cursor-pointer shrink-0"
+                    title="Clear Date Bought"
+                  >
+                    <X className="w-2.5 h-2.5" />
+                    <span>Clear</span>
+                  </button>
+                )}
+              </div>
               <input
                 type="date"
                 value={dateBought}
@@ -515,9 +529,43 @@ export const CalculatorView: React.FC<CalculatorViewProps> = ({
               />
             </div>
             <div className="min-w-0">
-              <label className="block text-[11px] font-extrabold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-1 truncate">
-                Date Sold <span className="font-normal text-[10px] opacity-75">(Optional)</span>
-              </label>
+              <div className="flex items-center justify-between gap-1 mb-1">
+                <label className="inline-flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wide text-slate-500 dark:text-slate-400 cursor-pointer select-none min-w-0">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(dateSold)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        const now = new Date();
+                        const yyyy = now.getFullYear();
+                        const mm = String(now.getMonth() + 1).padStart(2, '0');
+                        const dd = String(now.getDate()).padStart(2, '0');
+                        setDateSold(`${yyyy}-${mm}-${dd}`);
+                      } else {
+                        setDateSold('');
+                      }
+                    }}
+                    className="w-3.5 h-3.5 rounded text-blue-600 focus:ring-blue-500 border-slate-300 dark:border-slate-600 cursor-pointer shrink-0"
+                    title={dateSold ? 'Uncheck to remove Date Sold (mark In Stock)' : 'Check to mark as Sold today'}
+                  />
+                  <span className="truncate">Date Sold</span>
+                </label>
+                {dateSold ? (
+                  <button
+                    type="button"
+                    onClick={() => setDateSold('')}
+                    className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[10px] font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-100 dark:hover:bg-rose-900/80 border border-rose-200 dark:border-rose-800/80 transition-colors cursor-pointer shrink-0"
+                    title="Remove Date Sold"
+                  >
+                    <X className="w-2.5 h-2.5" />
+                    <span>Clear</span>
+                  </button>
+                ) : (
+                  <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500 shrink-0">
+                    Optional
+                  </span>
+                )}
+              </div>
               <input
                 type="date"
                 value={dateSold}
