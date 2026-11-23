@@ -45,6 +45,7 @@ export interface VehicleRecord {
   profit: number;
   margin: number;
   partners: PartnerSnapshot[];
+  photoUrl?: string;
   createdAt: number;
   updatedAt?: number;
 }

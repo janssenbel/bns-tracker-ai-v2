@@ -1,7 +1,7 @@
 import React from 'react';
 import { CurrencySymbol, PartnerSnapshot } from '../types';
 import { formatCurrency } from '../utils/formatters';
-import { Printer, TrendingUp, Percent, Clock, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { Printer, TrendingUp, Percent, Clock, AlertTriangle, CheckCircle2, Camera } from 'lucide-react';
 
 interface SummaryCardProps {
   title: string;
@@ -14,6 +14,7 @@ interface SummaryCardProps {
   markup: number;
   turnoverLabel: string;
   partnerOutlays: PartnerSnapshot[];
+  photoUrl?: string;
   onOpenDealSheet: () => void;
 }
 
@@ -28,6 +29,7 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({
   markup,
   turnoverLabel,
   partnerOutlays,
+  photoUrl,
   onOpenDealSheet,
 }) => {
   const isPending = sellPrice === 0 && totalCapital === 0;
@@ -37,16 +39,32 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({
   return (
     <div className="space-y-3.5 sm:space-y-4">
       {/* 1. Live Vehicle Tag Card */}
-      <div className="bg-slate-900 text-white rounded-2xl p-4 sm:p-5 shadow-lg border border-slate-800">
-        <div className="flex items-center justify-between text-xs font-extrabold text-slate-400 mb-1.5">
-          <span className="uppercase tracking-wider">Vehicle Preview</span>
-          <span className="plate-badge px-2.5 py-0.5 rounded text-xs">
-            {plate || 'NEW UNIT'}
-          </span>
+      <div className="bg-slate-900 text-white rounded-2xl p-4 sm:p-5 shadow-lg border border-slate-800 flex items-center gap-3.5">
+        {photoUrl ? (
+          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden border border-slate-700 bg-slate-800 shrink-0 shadow-sm">
+            <img
+              src={photoUrl}
+              alt={title || 'Vehicle photo'}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        ) : (
+          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl border border-dashed border-slate-700 bg-slate-800/60 flex flex-col items-center justify-center text-slate-500 shrink-0">
+            <Camera className="w-5 h-5 mb-0.5 opacity-70" />
+            <span className="text-[9px] font-bold uppercase tracking-wider">No Photo</span>
+          </div>
+        )}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between text-xs font-extrabold text-slate-400 mb-1.5 gap-2">
+            <span className="uppercase tracking-wider truncate">Vehicle Preview</span>
+            <span className="plate-badge px-2.5 py-0.5 rounded text-xs shrink-0">
+              {plate || 'NEW UNIT'}
+            </span>
+          </div>
+          <h2 className="text-base sm:text-xl font-extrabold text-white truncate tracking-tight">
+            {title || '- - - - -'}
+          </h2>
         </div>
-        <h2 className="text-base sm:text-xl font-extrabold text-white truncate tracking-tight">
-          {title || '- - - - -'}
-        </h2>
       </div>
 
       {/* 2. Partner Payouts Summary Card */}

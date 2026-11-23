@@ -19,6 +19,7 @@ import {
   Check,
   RotateCcw,
   X,
+  Camera,
 } from 'lucide-react';
 
 interface InventoryViewProps {
@@ -51,6 +52,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [showEditNameModal, setShowEditNameModal] = useState(false);
   const [draftName, setDraftName] = useState(businessName);
+  const [previewPhotoRecord, setPreviewPhotoRecord] = useState<VehicleRecord | null>(null);
 
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const iconUrl = `${import.meta.env.BASE_URL}apple-touch-icon.png?v=3`;
@@ -324,11 +326,35 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                         </div>
                       </div>
 
-                      {/* Vehicle Title */}
-                      <div className="flex items-center justify-between gap-2">
-                        <h3 className="font-extrabold text-sm text-slate-900 dark:text-white truncate">
-                          {r.title}
-                        </h3>
+                      {/* Vehicle Thumbnail + Title */}
+                      <div className="flex items-center justify-between gap-2.5">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          {r.photoUrl ? (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setPreviewPhotoRecord(r);
+                              }}
+                              className="w-12 h-12 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 shrink-0 shadow-xs cursor-pointer group relative"
+                              title="Tap to view larger photo"
+                            >
+                              <img
+                                src={r.photoUrl}
+                                alt={r.title}
+                                className="w-full h-full object-cover"
+                              />
+                            </button>
+                          ) : (
+                            <div className="w-12 h-12 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 bg-white/60 dark:bg-slate-900/50 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 shrink-0">
+                              <Car className="w-4 h-4 opacity-70" />
+                              <span className="text-[8px] font-bold uppercase">No Pic</span>
+                            </div>
+                          )}
+                          <h3 className="font-extrabold text-sm text-slate-900 dark:text-white truncate">
+                            {r.title}
+                          </h3>
+                        </div>
                         <span className="text-[11px] font-bold text-blue-600 dark:text-blue-400 flex items-center gap-0.5 shrink-0">
                           {isExpanded ? (
                             <>
@@ -492,15 +518,38 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                             isExpanded ? 'bg-blue-50/50 dark:bg-blue-950/20' : ''
                           }`}
                         >
-                          {/* Vehicle Title */}
-                          <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white">
-                            <div className="flex items-center gap-2">
-                              <span>{r.title}</span>
-                              {isExpanded ? (
-                                <ChevronUp className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                          {/* Vehicle Thumbnail + Title */}
+                          <td className="py-3 px-4 font-bold text-slate-900 dark:text-white">
+                            <div className="flex items-center gap-3">
+                              {r.photoUrl ? (
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setPreviewPhotoRecord(r);
+                                  }}
+                                  className="w-11 h-11 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 shrink-0 shadow-xs hover:ring-2 hover:ring-blue-500 transition-all cursor-pointer"
+                                  title="Click to enlarge photo"
+                                >
+                                  <img
+                                    src={r.photoUrl}
+                                    alt={r.title}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </button>
                               ) : (
-                                <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-600 transition-colors" />
+                                <div className="w-11 h-11 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 shrink-0">
+                                  <Camera className="w-3.5 h-3.5 opacity-60" />
+                                </div>
                               )}
+                              <div className="flex items-center gap-2 min-w-0">
+                                <span className="truncate">{r.title}</span>
+                                {isExpanded ? (
+                                  <ChevronUp className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
+                                ) : (
+                                  <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-600 transition-colors shrink-0" />
+                                )}
+                              </div>
                             </div>
                           </td>
 
@@ -805,6 +854,42 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
               </button>
             </div>
           </form>
+        </div>
+      )}
+
+      {/* Full-Size Vehicle Photo Lightbox Modal */}
+      {previewPhotoRecord && previewPhotoRecord.photoUrl && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-sm animate-in fade-in duration-200">
+          <div
+            className="fixed inset-0"
+            onClick={() => setPreviewPhotoRecord(null)}
+          />
+          <div className="relative w-full max-w-lg bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl z-10">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="plate-badge px-2 py-0.5 rounded text-xs shrink-0">
+                  {previewPhotoRecord.plate || 'NO PLATE'}
+                </span>
+                <h3 className="text-sm font-extrabold text-white truncate">
+                  {previewPhotoRecord.title}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPreviewPhotoRecord(null)}
+                className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="bg-slate-950 flex items-center justify-center max-h-[75vh] overflow-hidden">
+              <img
+                src={previewPhotoRecord.photoUrl}
+                alt={previewPhotoRecord.title}
+                className="w-full h-auto max-h-[75vh] object-contain"
+              />
+            </div>
+          </div>
         </div>
       )}
     </div>
